@@ -1,0 +1,42 @@
+[
+{
+"model": "bangazonapi.product",
+"pk": 1,
+"fields": {
+"title": "Macbook Pro",
+"description": "The latest Macbook Pro with a 16-inch Retina display and Touch Bar",
+"store": 1,
+"price": 1500.00,
+"product_type": 2,
+"quantity": 10,
+"image": "macbook_pro.jpg"
+}
+},
+{
+"model": "bangazonapi.product",
+"pk": 2,
+"fields": {
+"title": "Lenovo ThinkPad",
+"description": "A durable and reliable laptop for business use",
+"store": 2,
+"price": 800.00,
+"product_type": 2,
+"quantity": 15,
+"image": "lenovo_thinkpad.jpg"
+}
+},
+
+{
+"model": "bangazonapi.product",
+"pk": 3,
+"fields": {
+"title": "Samsung Galaxy S21",
+"description": "The latest Samsung Galaxy S21 with 5G capabilities and a triple camera system",
+"store": 1,
+"price": 1000.00,
+"product_type": 2,
+"quantity": 20,
+"image": "samsung_galaxy_s21.jpg"
+}
+}
+]

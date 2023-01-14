@@ -1,0 +1,32 @@
+[
+  {
+    "model": "bangazonapi.paymentmethod",
+    "pk": 1,
+    "fields": {
+      "customer": 1,
+      "label": "Debit Card",
+      "card_number":"2280169228176222",
+      "expiration_date": "01/2024"
+  }
+},
+{
+  "model":"bangazonapi.paymentmethod",
+  "pk": 2,
+  "fields":{
+    "customer": 1,
+    "label": "Capital One",
+    "card_number": "4001662563848574",
+    "expiration_date": "06/2027"
+  }
+},
+{
+  "model":"bangazonapi.paymentmethod",
+  "pk": 3,
+  "fields":{
+    "customer": 2,
+    "label": "AmEx",
+    "card_number": "9345021540911773",
+    "expiration_date": "08/2029"
+  }
+}
+]
