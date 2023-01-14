@@ -1,0 +1,92 @@
+[
+  {
+    "model": "bangazonapi.user",
+    "pk": 1,
+    "fields": {
+      "uid": "ff9ZN9nkhcWSuTQchrONXcEtlCJ3",
+      "first_name": "Rochelle",
+      "last_name": "Rossman",
+      "email": "rochelle.rossman@gmail.com",
+      "created_on": "2023-01-12",
+      "street_address": "212 Cherry Street",
+      "city": "Nashville",
+      "state": "TN",
+      "zipcode": 37115
+    }
+  },
+  {
+    "model":"bangazonapi.user",
+    "pk": 2,
+    "fields":{
+      "uid": 1,
+      "first_name": "Adams",
+      "last_name": "Balham",
+      "email": "abalham0@nationalgeographic.com",
+      "created_on": "2022-11-09",
+      "street_address": "7 Muir Street",
+      "city": "Dallas",
+      "state": "TX",
+      "zipcode": 53528
+    }
+  },
+  {
+    "model":"bangazonapi.user",
+    "pk":3,
+    "fields":{
+      "uid": 2,
+      "first_name": "Mina",
+      "last_name": "Foard",
+      "email": "mfoard1@parallels.com",
+      "created_on": "2022-12-16",
+      "street_address": "4601 Pankratz Trail",
+      "city": "Washington",
+      "state": "DC",
+      "zipcode": 67749
+    }
+  },
+  {
+    "model":"bangazonapi.user",
+    "pk": 4,
+    "fields":{
+      "uid": 3,
+      "first_name": "Catlin",
+      "last_name": "Nuccitelli",
+      "email": "cnuccitelli2@cafepress.com",
+      "created_on": "2022-11-09",
+      "street_address": "95 Monument Avenue",
+      "city": "Topeka",
+      "state": "KS",
+      "zipcode": 11141
+    }
+  },
+  {
+    "model":"bangazonapi.user",
+    "pk": 5,
+    "fields":{
+      "uid": 4,
+      "first_name": "Gil",
+      "last_name": "Squibe",
+      "email": "gsquibe3@washingtonpost.com",
+      "created_on": "2022-12-16",
+      "street_address": "10253 Erie Hill",
+      "city": "New York City",
+      "state": "NY",
+      "zipcode": 92315
+    }
+  },
+  {
+    "model":"bangazonapi.user",
+    "pk": 6,
+    "fields":{
+      "uid": 5,
+      "first_name": "Doralynne",
+      "last_name": "Cayzer",
+      "email": "dcayzer4@free.fr",
+      "created_on": "2022-11-09",
+      "street_address": "774 Larry Point",
+      "city": "Bozeman",
+      "state": "MT",
+      "zipcode": 62488
+    }
+  }
+]

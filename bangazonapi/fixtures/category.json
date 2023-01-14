@@ -1,0 +1,51 @@
+[
+  {
+    "model": "bangazonapi.category",
+    "pk": 1,
+    "fields": {
+      "label": "Toys & Games"
+    }
+  },
+  {
+    "model": "bangazonapi.category",
+    "pk": 2,
+    "fields": {
+      "label": "Electronics"
+    }
+  },
+  {
+    "model": "bangazonapi.category",
+    "pk": 3,
+    "fields": {
+      "label": "Pet Supplies"
+    }
+  },
+  {
+    "model": "bangazonapi.category",
+    "pk": 4,
+    "fields": {
+      "label": "Entertainment"
+    }
+  },
+  {
+    "model": "bangazonapi.category",
+    "pk": 5,
+    "fields": {
+      "label": "Health & Beauty"
+    }
+  },
+  {
+    "model": "bangazonapi.category",
+    "pk": 6,
+    "fields": {
+      "label": "Shoes & Clothing"
+    }
+  },
+  {
+    "model": "bangazonapi.category",
+    "pk": 7,
+    "fields": {
+      "label": "Housewares"
+    }
+  }
+]

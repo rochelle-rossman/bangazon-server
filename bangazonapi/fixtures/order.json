@@ -1,0 +1,32 @@
+[
+  {
+    "model": "bangazonapi.order",
+    "pk": 1,
+    "fields": {
+      "store": 1,
+      "customer": 1,
+      "ordered_on": "2022-03-01",
+      "payment_method": 1
+    }
+  },
+  {
+    "model": "bangazonapi.order",
+    "pk": 2,
+    "fields": {
+      "store": 2,
+      "customer": 2,
+      "ordered_on": "2022-03-01",
+      "payment_method": 2
+    }
+  },
+  {
+    "model": "bangazonapi.order",
+    "pk": 3,
+    "fields": {
+      "store": 3,
+      "customer": 3,
+      "ordered_on": "2022-03-01",
+      "payment_method": 3
+    }
+  }
+]
