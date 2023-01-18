@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-class UserViewSet(ViewSet):
+class UserView(ViewSet):
     def list(self, request):
         """List users"""
         users = User.objects.all()

@@ -3,7 +3,7 @@
     "model": "bangazonapi.store",
     "pk": 1,
     "fields": {
-      "seller": 1,
+      "seller": "ff9ZN9nkhcWSuTQchrONXcEtlCJ3",
       "name": "Kozey and Sons"
     }
   },
@@ -11,7 +11,7 @@
     "model":"bangazonapi.store",
     "pk": 2,
     "fields":{
-      "seller": 2,
+      "seller": "2",
       "name": "Ratke-Weimann"
     }
   },
@@ -19,7 +19,7 @@
     "model":"bangazonapi.store",
     "pk": 3,
     "fields":{
-      "seller": 3,
+      "seller": "3",
       "name": "Gusikowski and Sons"
     }
   }

@@ -13,7 +13,6 @@ def validate_expiration_date(value):
 """
     if not re.match(r'^(0[1-9]|1[0-2])/[0-9]{4}$', value):
         raise ValidationError('Invalid expiration date format. Use MM/YYYY')
-
 class PaymentMethod(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     label = models.CharField(max_length=50)

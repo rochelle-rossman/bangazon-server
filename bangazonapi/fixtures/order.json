@@ -5,8 +5,8 @@
     "fields": {
       "store": 1,
       "customer": 1,
-      "ordered_on": "2022-03-01",
-      "payment_method": 1
+      "payment_method": 1,
+      "products": [2]
     }
   },
   {
@@ -15,8 +15,8 @@
     "fields": {
       "store": 2,
       "customer": 2,
-      "ordered_on": "2022-03-01",
-      "payment_method": 2
+      "payment_method": 2,
+      "products": [1, 2]
     }
   },
   {
@@ -25,8 +25,8 @@
     "fields": {
       "store": 3,
       "customer": 3,
-      "ordered_on": "2022-03-01",
-      "payment_method": 3
+      "payment_method": 3,
+      "products": [4]
     }
   }
 ]
