@@ -9,6 +9,10 @@ class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     price = models.FloatField(validators=[MinValueValidator(0.00), MaxValueValidator(99999.99)])
     product_type = models.ForeignKey(Category, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    inventory = models.IntegerField()
     image = models.ImageField(upload_to='products', height_field=None,
                                    width_field=None, max_length=None, null=True, blank=True)
+
+    def deduct_from_inventory(self, quantity):
+        self.inventory -= quantity
+        self.save()

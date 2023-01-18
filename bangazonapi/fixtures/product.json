@@ -8,7 +8,7 @@
 "store": 1,
 "price": 1500.00,
 "product_type": 2,
-"quantity": 10,
+"inventory": 10,
 "image": "macbook_pro.jpg"
 }
 },
@@ -21,7 +21,7 @@
 "store": 2,
 "price": 800.00,
 "product_type": 2,
-"quantity": 15,
+"inventory": 15,
 "image": "lenovo_thinkpad.jpg"
 }
 },
@@ -35,7 +35,7 @@
 "store": 1,
 "price": 1000.00,
 "product_type": 2,
-"quantity": 20,
+"inventory": 20,
 "image": "samsung_galaxy_s21.jpg"
 }
 }
