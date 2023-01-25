@@ -8,20 +8,17 @@ class ProductSerializer(serializers.ModelSerializer):
   """JSON serializer for products """
   store = serializers.SerializerMethodField()
   product_type = serializers.SerializerMethodField()
-  price = serializers.SerializerMethodField()
+  quantity = serializers.IntegerField(write_only=True)
+
   class Meta:
     model = Product
-    fields = ('id', 'title', 'description', 'price', 'inventory', 'image', 'store', 'product_type')
+    fields = ('id', 'title', 'description', 'price', 'inventory', 'image', 'store', 'product_type', 'quantity')
   
   def get_store(self, obj):
-    return obj.store.name
+    return {"name":obj.store.name, "id":obj.store.id}
   
   def get_product_type(self, obj):
     return obj.product_type.label
-  
-  def get_price(self, obj):
-    # format the obj.price value as a string with 2 decimal places, and a "$" sign in front of it.
-    return f"${obj.price:.2f}".format(obj.price)
   
 class ProductSerializerLimited(ProductSerializer):
     class Meta:
@@ -32,10 +29,18 @@ class ProductSerializerLimited(ProductSerializer):
     
 class ProductView(ViewSet):
   def list(self, request):
-    """List products"""
-    products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
+      """List products"""
+      category = request.query_params.get('category')
+      store = request.query_params.get('store')
+      if category:
+          products = Product.objects.filter(product_type__id=category)
+      if store:
+        products = Product.objects.filter(store=store)
+      else:
+          products = Product.objects.all()
+      serializer = ProductSerializer(products, many=True)
+      return Response(serializer.data)
+
   
   def retrieve(self, request, pk):
     """GET single product"""

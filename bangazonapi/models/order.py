@@ -39,9 +39,3 @@ def set_ordered_on_to_null(sender, instance, **kwargs):
         if instance.status == 'in-progress':
             instance.ordered_on = None
 pre_save.connect(set_ordered_on_to_null, sender=Order)
-
-# @receiver(pre_save, sender=Order)
-# def set_ordered_on_to_current_date(sender, instance, **kwargs):
-#     if instance.status == 'completed':
-#         instance.ordered_on = 
-# pre_save.connect(set_ordered_on_to_current_date, sender=Order)
