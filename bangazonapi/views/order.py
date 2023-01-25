@@ -119,3 +119,9 @@ class OrderView(ViewSet):
       order.save()
       serializer = OrderSerializer(order)
       return Response(serializer.data, status=status.HTTP_201_CREATED)
+  
+  def destroy(self, request, pk):
+    """Delete order"""
+    order = Order.objects.get(pk=pk)
+    order.delete()
+    return Response({"status": status.HTTP_204_NO_CONTENT})
