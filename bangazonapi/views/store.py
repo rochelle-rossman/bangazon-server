@@ -14,18 +14,23 @@ class StoreSerializer(serializers.ModelSerializer):
 class StoreView(ViewSet):
   def list(self, request):
     """List all stores"""
-    stores = Store.objects.all()
+    seller = request.query_params.get('seller', None)
+    if seller is not None:
+        stores = Store.objects.filter(seller=seller)
+    else:
+        stores = Store.objects.all()
     serializer = StoreSerializer(stores, many=True)
     return Response(serializer.data)
   
-  def retrieve(self, request, pk):
+  def retrieve(self, request, pk=None):
     """Retieve single store """
     try:
-      store = Store.objects.get(pk=pk)
-      serializer = StoreSerializer(store)
-      return Response(serializer.data)
-    except Store.DoesNotExist as e:
-      return Response({'message': e.args[0]}, status=status.HTTP_404_NOT_FOUND)
+        store = Store.objects.get(pk=pk)
+    except Store.DoesNotExist:
+        return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = StoreSerializer(store)
+    return Response(serializer.data)
+
     
   def update(self, request, pk):
     """Update a single store"""
@@ -40,7 +45,7 @@ class StoreView(ViewSet):
     """Create a store for the authenticated user"""
     try:
       store = Store.objects.create(
-        seller = User.objects.get(uid=request.data["seller"]),
+        seller = User.objects.get(id=request.data["seller"]),
         name = request.data["name"]
       )
       serializer = StoreSerializer(store)

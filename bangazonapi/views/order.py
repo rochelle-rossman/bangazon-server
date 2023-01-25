@@ -48,7 +48,11 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderView(ViewSet):
   def list(self, request):
     """GET all orders"""
-    orders = Order.objects.all()
+    customer = request.query_params.get("customer")
+    if customer is not None:
+      orders = Order.objects.filter(customer=User.objects.get(id=customer))
+    else:
+      orders = Order.objects.all()
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
   
@@ -92,7 +96,7 @@ class OrderView(ViewSet):
 
       try:
           store = Store.objects.get(pk=request.data["store"])
-          customer = User.objects.get(uid=request.data["customer"])
+          customer = User.objects.get(id=request.data["customer"])
           payment_method = PaymentMethod.objects.get(pk=request.data["payment_method"])
       except (Store.DoesNotExist, User.DoesNotExist, PaymentMethod.DoesNotExist):
           return Response({"message": "Invalid store, customer or payment_method id"},
