@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from bangazonapi.models import Product, Store, Category
+from django.db.models import Q #Q objects are used to create complex queries by combining multiple query conditions using logical operators
 
 class ProductSerializer(serializers.ModelSerializer):
   """JSON serializer for products """
@@ -29,17 +30,20 @@ class ProductSerializerLimited(ProductSerializer):
     
 class ProductView(ViewSet):
   def list(self, request):
-      """List products"""
-      category = request.query_params.get('category')
-      store = request.query_params.get('store')
-      if category:
-          products = Product.objects.filter(product_type__id=category)
-      if store:
-        products = Product.objects.filter(store=store)
-      else:
-          products = Product.objects.all()
-      serializer = ProductSerializer(products, many=True)
-      return Response(serializer.data)
+    """List products"""
+    category = request.query_params.get('category')
+    store = request.query_params.get('store')
+    products = Product.objects.all()
+    if category and store:
+    #get products by category and store ie `http://localhost:8000/products?category=1&store=5`
+        products = products.filter(Q(product_type__id=category) & Q(store=store)) 
+    elif category:
+        products = products.filter(product_type__id=category)
+    elif store:
+        products = products.filter(store=store)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
 
   
   def retrieve(self, request, pk):
