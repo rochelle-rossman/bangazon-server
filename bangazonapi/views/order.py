@@ -5,14 +5,17 @@ from rest_framework.exceptions import ValidationError
 from bangazonapi.models import Order, PaymentMethod, Product, Store, User, ProductOrder
 from .product import ProductSerializerLimited
 from .product_order import ProductOrderSerializer
+from django.utils import timezone
+from django.db.models import Q 
 
 class OrderSerializer(serializers.ModelSerializer):
   """JSON Serializer for Orders"""
   store = serializers.SerializerMethodField()
   payment_method = serializers.SerializerMethodField()
   customer = serializers.SerializerMethodField()
-  products = ProductSerializerLimited(many=True)
+  products = serializers.SerializerMethodField()
   total = serializers.SerializerMethodField()
+
 
   class Meta:
     model = Order
@@ -25,15 +28,22 @@ class OrderSerializer(serializers.ModelSerializer):
     return obj.customer.first_name, obj.customer.last_name, obj.customer.email
   
   def get_payment_method(self, obj):
+    if obj.payment_method is None:
+      return None
     label = obj.payment_method.label
     last_four_digits = obj.payment_method.card_number[-4:]
     obscured_card_number = "**** **** **** " + last_four_digits
     return {"label": label, "card_number": obscured_card_number}
   
   def get_products(self, obj):
-          products = obj.products.all()
-          serializer = ProductSerializerLimited(products, many=True)
-          return serializer.data
+        products_list = []
+        for product in obj.products.all():
+            try:
+                product_order = ProductOrder.objects.get(order=obj, product=product)
+                products_list.append({"id": product.id, "quantity": product_order.quantity})
+            except ProductOrder.DoesNotExist:
+                pass
+        return products_list
         
   def get_total(self, obj):
     total = 0
@@ -48,11 +58,18 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderView(ViewSet):
   def list(self, request):
     """GET all orders"""
+    store = request.query_params.get('store')
+    order_status = request.query_params.get('status')
     customer = request.query_params.get("customer")
-    if customer is not None:
-      orders = Order.objects.filter(customer=User.objects.get(id=customer))
-    else:
-      orders = Order.objects.all()
+    orders = Order.objects.all()
+    if customer and order_status:
+      orders = orders.filter(Q(status=order_status) & Q(customer=customer))
+    elif order_status and store:
+      orders= orders.filter(Q(status=order_status) & Q(store=store))
+    elif customer:
+      orders = orders.filter(customer=customer)
+    elif store:
+      orders = orders.filter(store=store)
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
   
@@ -67,27 +84,52 @@ class OrderView(ViewSet):
     
 
   def update(self, request, pk):
-      order = Order.objects.get(pk=pk)
-      old_status = order.status
-      order.status = request.data["status"]
-      order.payment_method = PaymentMethod.objects.get(id=request.data["payment_method"])
-      product_ids = request.data["products"]
-      if not isinstance(product_ids, list):
-          raise ValidationError({"message": "products field must be a list"})
+    try:
+        order = Order.objects.get(pk=pk)
+    except Order.DoesNotExist:
+        return Response({'message': 'Order does not exist'}, status=status.HTTP_404_NOT_FOUND)
+      
+    order.status = request.data["status"]
+    if order.status == 'completed' and order.ordered_on is None:
+      order.ordered_on = timezone.now().date()
 
-      for product in product_ids:
-          if 'id' not in product or 'quantity' not in product:
-              raise ValidationError({"message": "products field must contain id and quantity"})
-          try:
-              product_obj = Product.objects.get(id=product["id"])
-          except Product.DoesNotExist:
-              return Response({'message': f"Product {product['id']} does not exist"})
-      products = Product.objects.filter(id__in=[product['id'] for product in product_ids])
-      order.products.set(products)
-      if order.status == "canceled" and old_status != "canceled":
-          order.return_products()
-      order.save()
-      return Response(None, status=status.HTTP_202_ACCEPTED)
+    if request.data.get("payment_method"):
+        try:
+            payment_method = PaymentMethod.objects.get(id=request.data["payment_method"])
+            order.payment_method = payment_method
+        except PaymentMethod.DoesNotExist:
+            return Response({'message': 'PaymentMethod does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        order.payment_method = None
+
+    product_ids = request.data["products"]
+    if not isinstance(product_ids, list):
+        raise ValidationError({"message": "products field must be a list"})
+
+    for product in product_ids:
+        if 'id' not in product or 'quantity' not in product:
+            raise ValidationError({"message": "products field must contain id and quantity"})
+        try:
+            product_obj = Product.objects.get(id=product["id"])
+        except Product.DoesNotExist:
+            return Response({'message': f"Product {product['id']} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    products = Product.objects.filter(id__in=[product['id'] for product in product_ids])
+    product_orders = ProductOrder.objects.filter(order=order)
+    for product_order in product_orders:
+        product_order.quantity = next((product['quantity'] for product in product_ids if product['id'] == product_order.product.id), None)
+        if product_order.quantity is None:
+            product_order.delete()
+        else:
+            product_order.save()
+
+    for product in products:
+        product_order, created = ProductOrder.objects.get_or_create(order=order, product=product)
+        if not created:
+            continue
+        product_order.quantity = next((product['quantity'] for product in product_ids if product['id'] == product_order.product.id), None)
+        product_order.save()
+    order.save()
+    return Response({'message': 'Order Updated successfully', 'data': OrderSerializer(order).data})
 
     
   def create(self, request):
@@ -97,12 +139,21 @@ class OrderView(ViewSet):
       try:
           store = Store.objects.get(pk=request.data["store"])
           customer = User.objects.get(id=request.data["customer"])
-          payment_method = PaymentMethod.objects.get(pk=request.data["payment_method"])
-      except (Store.DoesNotExist, User.DoesNotExist, PaymentMethod.DoesNotExist):
-          return Response({"message": "Invalid store, customer or payment_method id"},
-                          status=status.HTTP_400_BAD_REQUEST)
+      except (Store.DoesNotExist, User.DoesNotExist):
+        return Response({"message": "Invalid store or customer id"}, status=status.HTTP_400_BAD_REQUEST)
 
-      order = Order.objects.create(store=store, customer=customer, payment_method=payment_method)
+      order_status = 'in-progress'
+      if 'status' in request.data:
+          order_status = request.data['status']
+      if order_status != 'in-progress':
+          try:
+              payment_method = PaymentMethod.objects.get(pk=request.data["payment_method"])
+          except PaymentMethod.DoesNotExist:
+              return Response({"message": "Invalid payment_method id"}, status=status.HTTP_400_BAD_REQUEST)
+      else:
+          payment_method = None
+
+      order = Order.objects.create(store=store, customer=customer, payment_method=payment_method, status=order_status)
       total = 0
       product_list = []
       for product in products:
@@ -114,11 +165,10 @@ class OrderView(ViewSet):
           ProductOrder.objects.create(product=product_obj, order=order, quantity=product['quantity'])
           product_list.append(product_obj)
           total += product_obj.price * product['quantity']
-      order.products.add(*product_list)
-      order.total = total
-      order.save()
-      serializer = OrderSerializer(order)
-      return Response(serializer.data, status=status.HTTP_201_CREATED)
+          serializer = OrderSerializer(order)
+          return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
   
   def destroy(self, request, pk):
     """Delete order"""

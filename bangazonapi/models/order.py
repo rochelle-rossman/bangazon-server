@@ -15,7 +15,7 @@ class Order(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     ordered_on = models.DateField(auto_now_add=True, null=True, blank=True)
-    payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
+    payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE, null=True)
     products = models.ManyToManyField("Product", through="ProductOrder", related_name="orders")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in-progress')
 
