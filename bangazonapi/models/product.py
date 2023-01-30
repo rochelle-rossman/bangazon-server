@@ -13,5 +13,8 @@ class Product(models.Model):
     image = models.CharField(max_length=255, blank=True, null=True)
 
     def deduct_from_inventory(self, quantity):
-        self.inventory -= quantity
-        self.save()
+        if self.inventory >= quantity:
+            self.inventory -= quantity
+            self.save()
+        else:
+            raise ValueError("Not enough inventory to complete the order.")
