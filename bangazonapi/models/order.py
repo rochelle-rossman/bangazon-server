@@ -9,7 +9,6 @@ from django.apps import apps
 class Order(models.Model):
     STATUS_CHOICES = (
         ('in-progress', 'In Progress'),
-        ('completed', 'Completed'),
         ('canceled', 'Canceled'),
     )
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
@@ -24,14 +23,6 @@ class Order(models.Model):
         for product in self.products.all():
             total += product.price
         return total
-    
-    def return_products(self):
-        if self.status == 'canceled':
-            ProductOrder = apps.get_model('bangazonapi', 'ProductOrder')
-            product_orders = ProductOrder.objects.filter(order=self)
-            for product_order in product_orders:
-                product = product_order.product
-                product.deduct_from_inventory(-product_order.quantity)
 
             
 @receiver(pre_save, sender=Order)
