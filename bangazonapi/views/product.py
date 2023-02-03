@@ -19,7 +19,7 @@ class ProductSerializer(serializers.ModelSerializer):
     return {"name":obj.store.name, "id":obj.store.id}
   
   def get_product_type(self, obj):
-    return obj.product_type.label
+    return {"label":obj.product_type.label, "id": obj.product_type.id}
   
 class ProductSerializerLimited(ProductSerializer):
     class Meta:
