@@ -61,7 +61,7 @@ class OrderView(ViewSet):
     store = request.query_params.get('store')
     order_status = request.query_params.get('status')
     customer = request.query_params.get("customer")
-    orders = Order.objects.all()
+    orders = Order.objects.all().order_by('-id')
     if customer and order_status:
       orders = orders.filter(Q(status=order_status) & Q(customer=customer))
     elif order_status and store:
@@ -84,49 +84,57 @@ class OrderView(ViewSet):
     
 
   def update(self, request, pk):
+    # Check if the order exists
     try:
         order = Order.objects.get(pk=pk)
     except Order.DoesNotExist:
         return Response({'message': 'Order does not exist'}, status=status.HTTP_404_NOT_FOUND)
-      
+    # When the order's status is updated to 'completed', add the date to the ordered_on field  
     order.status = request.data["status"]
     if order.status == 'completed' and order.ordered_on is None:
       order.ordered_on = timezone.now().date()
-
+    # If payment_method exists in the order, add the payment_method
     if request.data.get("payment_method"):
         try:
             payment_method = PaymentMethod.objects.get(id=request.data["payment_method"])
             order.payment_method = payment_method
         except PaymentMethod.DoesNotExist:
             return Response({'message': 'PaymentMethod does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    # If there is no payment_method in the request data, set the payment_method to None
     else:
         order.payment_method = None
-
+    # Get the product ids from the order's product information and validate the field is a list
     product_ids = request.data["products"]
     if not isinstance(product_ids, list):
         raise ValidationError({"message": "products field must be a list"})
-
+    # Loop through the product ids to get the quantity
     for product in product_ids:
         if 'id' not in product or 'quantity' not in product:
             raise ValidationError({"message": "products field must contain id and quantity"})
         try:
-            product_obj = Product.objects.get(id=product["id"])
+            product = Product.objects.get(id=product["id"])
         except Product.DoesNotExist:
             return Response({'message': f"Product {product['id']} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    
     products = Product.objects.filter(id__in=[product['id'] for product in product_ids])
     product_orders = ProductOrder.objects.filter(order=order)
     for product_order in product_orders:
-        product_order.quantity = next((product['quantity'] for product in product_ids if product['id'] == product_order.product.id), None)
+    # Update the quantity of each product order
+    # The next function is used to retrieve the first item from an iterable
+        product_order.quantity = next((product['quantity'] for product in product_ids if product['id'] == product_order.product.id), 0)
+        # If the updated quantity is None, delete the product order
         if product_order.quantity is None:
             product_order.delete()
         else:
+        # Save the updated product order
             product_order.save()
 
     for product in products:
+    # Get or create the product order associated with the order and product
         product_order, created = ProductOrder.objects.get_or_create(order=order, product=product)
         if not created:
             continue
-        product_order.quantity = next((product['quantity'] for product in product_ids if product['id'] == product_order.product.id), None)
+        product_order.quantity = next((product['quantity'] for product in product_ids if product['id'] == product_order.product.id), 0)
         product_order.save()
     order.save()
     return Response({'message': 'Order Updated successfully', 'data': OrderSerializer(order).data})

@@ -2,15 +2,54 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
-from bangazonapi.models import ProductOrder, Product, Order
+from bangazonapi.models import ProductOrder, Product, Order, Store, PaymentMethod, User, Category
 
+class CategorySerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Category
+    fields = ('id', 'label')
+
+class UserSerializer(serializers.ModelSerializer):
+    """JSON serializer for Users"""
+    class Meta:
+        model = User
+        fields = ('id', 'first_name', 'last_name', 'email', 'street_address', 'city', 'state', 'zipcode')
+class StoreSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Store
+    fields = ('id', 'name')
+
+class PaymentMethodSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = PaymentMethod
+    fields = ('id', 'label')
+
+class ProductSerializer(serializers.ModelSerializer):
+  store = StoreSerializer()
+  product_type = CategorySerializer()
+
+  class Meta:
+    model = Product
+    fields = ('id', 'title', 'price', 'image', 'store', 'product_type')
+
+class OrderSerializer(serializers.ModelSerializer):
+  customer = serializers.StringRelatedField()
+  payment_method = PaymentMethodSerializer()
+  products = ProductSerializer(many=True)
+  store = StoreSerializer()
+  customer = UserSerializer()
+
+  class Meta:
+    model = Order
+    fields = ('id', 'ordered_on', 'status', 'store', 'customer', 'payment_method', 'products')
 
 class ProductOrderSerializer(serializers.ModelSerializer):
-  
+  product = ProductSerializer()
+  order = OrderSerializer()
+
   class Meta:
     model = ProductOrder
     fields = ('id', 'product', 'order', 'quantity')
-    depth = 1
 
 class ProductOrderView(ViewSet):
   def list(self, request):
